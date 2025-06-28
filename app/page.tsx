@@ -1,103 +1,181 @@
-import Image from "next/image";
+
+'use client';
+
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import GlassButton from './components/send-buttons';
+import { X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [showForm, setShowForm] = useState(false);
+  const [blurVisible, setBlurVisible] = useState(false);
+  const [form, setForm] = useState({ name: '', wallet: '', telegram: '' });
+  const [errors, setErrors] = useState({ name: '', wallet: '', telegram: '' });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const openForm = () => {
+    setBlurVisible(true);
+    setTimeout(() => setShowForm(true), 100);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setTimeout(() => setBlurVisible(false), 90);
+  };
+
+  const validateWallet = (addr: string) => /^0x[a-fA-F0-9]{40}$/.test(addr);
+  const validateTelegram = (handle: string) => /^@[\w\d_]{3,}$/.test(handle);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const newErrors = {
+      name: form.name.trim().length < 3 ? 'Name must be at least 3 characters' : '',
+      wallet: validateWallet(form.wallet) ? '' : 'Wallet must start with 0x and be 42 characters',
+      telegram: validateTelegram(form.telegram) ? '' : 'Telegram must start with @',
+    };
+
+    setErrors(newErrors);
+
+    const hasErrors = Object.values(newErrors).some(Boolean);
+    if (hasErrors) {
+      toast.error("form errors")
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || 'Submission failed');
+      } else {
+        toast.success('Successfully joined the waitlist!');
+        setForm({ name: '', wallet: '', telegram: '' });
+        setShowForm(false);
+        setTimeout(() => setBlurVisible(false), 90);
+      }
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
+      console.error('Form error:', err);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div className="h-screen flex items-center flex-col bg-gradient-to-bl from-stone-900">
+        <img
+          src="/chronix.png"
+          height={400}
+          width={400}
+          alt="chronix"
+          className="mt-32 h-52 w-52 lg:h-[400px] lg:w-[400px] md:h-[400px] md:w-[400px]"
+        />
+        <h1 className="text-2xl lg:text-3xl italic text-white ">
+          predict. profit. plant the future.
+        </h1>
+
+        <button className="button mt-14" onClick={openForm}>
+          <div className="wrap">
+            <p>
+              <span>✧</span>
+              <span>✦</span>
+              join waitlist
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {blurVisible && (
+          <motion.div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="relative z-10 p-10 rounded-3xl shadow-2xl w-full max-w-2xl bg-black/50 backdrop-blur-md shadow-stone-900"
+            >
+              <button
+                onClick={closeForm}
+                className="absolute top-6 right-6 text-gray-400 hover:text-white transition"
+              >
+                <X size={24} />
+              </button>
+
+              <h2 className="text-2xl text-center font-bold mb-2 text-white">join the waitlist</h2>
+              <h2 className="text-sm text-center font-light italic mb-6 text-white">
+                chronix isn’t explained. it has to be experienced.
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={`w-full px-5 py-3 focus:outline-none focus:ring-0 rounded-xl text-lg border-b-2 ${errors.name ? 'border-red-500' : 'border-white'
+                      }`}
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </div>
+
+                <div>
+                  <input
+                    type="text"
+                    placeholder="wallet address"
+                    value={form.wallet}
+                    onChange={(e) => setForm({ ...form, wallet: e.target.value })}
+                    className={`w-full px-5 py-3 focus:outline-none focus:ring-0 rounded-xl text-lg border-b-2 ${errors.wallet ? 'border-red-500' : 'border-white'
+                      }`}
+                  />
+                  {errors.wallet && <p className="text-red-500 text-sm mt-1">{errors.wallet}</p>}
+                </div>
+
+                <div>
+                  <input
+                    type="text"
+                    placeholder="telegram"
+                    value={form.telegram}
+                    onChange={(e) => setForm({ ...form, telegram: e.target.value })}
+                    className={`w-full px-5 py-3 focus:outline-none focus:ring-0 rounded-xl text-lg border-b-2 ${errors.telegram ? 'border-red-500' : 'border-white'
+                      }`}
+                  />
+                  {errors.telegram && <p className="text-red-500 text-sm mt-1">{errors.telegram}</p>}
+                </div>
+
+                <div className="flex justify-end mt-8">
+                  <GlassButton />
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
