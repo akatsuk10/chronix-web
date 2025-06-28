@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -39,7 +38,7 @@ export default function Home() {
 
     const hasErrors = Object.values(newErrors).some(Boolean);
     if (hasErrors) {
-      toast.error("form errors")
+      toast.error("form errors");
       return;
     }
 
@@ -76,7 +75,7 @@ export default function Home() {
           alt="chronix"
           className="mt-32 h-52 w-52 lg:h-[400px] lg:w-[400px] md:h-[400px] md:w-[400px]"
         />
-        <h1 className="text-2xl lg:text-3xl italic text-white ">
+        <h1 className="text-2xl lg:text-3xl italic text-white">
           predict. profit. plant the future.
         </h1>
 
@@ -131,38 +130,50 @@ export default function Home() {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
+                {/* Name Field */}
+                <div className="relative group">
                   <input
                     type="text"
                     placeholder="name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className={`w-full px-5 py-3 focus:outline-none focus:ring-0 rounded-xl text-lg border-b-2 ${errors.name ? 'border-red-500' : 'border-white'
-                      }`}
+                    className={`w-full px-5 py-3 rounded-xl text-lg text-white bg-black/30 backdrop-blur-md 
+                      border-2 transition-all duration-200 ease-in-out
+                      focus:outline-none focus:ring-2 focus:ring-white/30
+                      shadow-inner group-hover:shadow-xl group-focus-within:shadow-lg
+                      ${errors.name ? 'border-red-500' : 'border-white/20'}`}
                   />
                   {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                 </div>
 
-                <div>
+                {/* Wallet Field */}
+                <div className="relative group">
                   <input
                     type="text"
                     placeholder="wallet address"
                     value={form.wallet}
                     onChange={(e) => setForm({ ...form, wallet: e.target.value })}
-                    className={`w-full px-5 py-3 focus:outline-none focus:ring-0 rounded-xl text-lg border-b-2 ${errors.wallet ? 'border-red-500' : 'border-white'
-                      }`}
+                    className={`w-full px-5 py-3 rounded-xl text-lg text-white bg-black/30 backdrop-blur-md 
+                      border-2 transition-all duration-200 ease-in-out
+                      focus:outline-none focus:ring-2 focus:ring-white/30
+                      shadow-inner group-hover:shadow-xl group-focus-within:shadow-lg
+                      ${errors.wallet ? 'border-red-500' : 'border-white/20'}`}
                   />
                   {errors.wallet && <p className="text-red-500 text-sm mt-1">{errors.wallet}</p>}
                 </div>
 
-                <div>
+                {/* Telegram Field */}
+                <div className="relative group">
                   <input
                     type="text"
                     placeholder="telegram"
                     value={form.telegram}
                     onChange={(e) => setForm({ ...form, telegram: e.target.value })}
-                    className={`w-full px-5 py-3 focus:outline-none focus:ring-0 rounded-xl text-lg border-b-2 ${errors.telegram ? 'border-red-500' : 'border-white'
-                      }`}
+                    className={`w-full px-5 py-3 rounded-xl text-lg text-white bg-black/30 backdrop-blur-md 
+                      border-2 transition-all duration-200 ease-in-out
+                      focus:outline-none focus:ring-2 focus:ring-white/30
+                      shadow-inner group-hover:shadow-xl group-focus-within:shadow-lg
+                      ${errors.telegram ? 'border-red-500' : 'border-white/20'}`}
                   />
                   {errors.telegram && <p className="text-red-500 text-sm mt-1">{errors.telegram}</p>}
                 </div>
@@ -178,4 +189,3 @@ export default function Home() {
     </div>
   );
 }
-
